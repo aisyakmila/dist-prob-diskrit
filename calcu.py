@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # ================== SIDEBAR ==================
-st.sidebar.title("📌 Distribusi Diskrit")
+st.sidebar.title("📌 Hitung Probabilitas")
 menu = st.sidebar.selectbox(
     "Pilih Distribusi",
     ["Home", "Binomial", "Hipergeometrik", "Geometrik", "Binomial Negatif", "Poisson"]
@@ -40,7 +40,7 @@ elif menu == "Binomial":
     p = st.slider("Peluang sukses (p)", 0.0, 1.0, 0.5)
     x = st.number_input("Jumlah sukses (x)", min_value=0, max_value=n, value=0, step=1)
 
-    if st.button("Hitung"):
+    if st.button("🔢 Hitung"):
         x_vals = np.arange(0, n + 1)
         pmf_vals = stats.binom.pmf(x_vals, n, p)
         cdf_vals = stats.binom.cdf(x_vals, n, p)
@@ -67,7 +67,7 @@ elif menu == "Hipergeometrik":
     n = st.number_input("Ukuran sampel (n)", min_value=1, value=10)
     x = st.number_input("Sukses dalam sampel (x)", min_value=0, value=0)
 
-    if st.button("Hitung"):
+    if st.button("🔢 Hitung"):
         max_x = min(n, K)
         x_vals = np.arange(0, max_x + 1)
 
@@ -94,7 +94,7 @@ elif menu == "Geometrik":
     p = st.slider("Peluang sukses (p)", 0.0, 1.0, 0.5)
     x = st.number_input("Percobaan ke-x", min_value=1, value=1)
 
-    if st.button("Hitung"):
+    if st.button("🔢 Hitung"):
         x_vals = np.arange(1, x + 10)
 
         pmf_vals = stats.geom.pmf(x_vals, p)
@@ -121,7 +121,7 @@ elif menu == "Binomial Negatif":
     p = st.slider("Peluang sukses (p)", 0.0, 1.0, 0.5)
     x = st.number_input("Jumlah kegagalan", min_value=0, value=0)
 
-    if st.button("Hitung"):
+    if st.button("🔢 Hitung"):
         x_vals = np.arange(0, x + 15)
 
         pmf_vals = stats.nbinom.pmf(x_vals, r, p)
@@ -147,7 +147,7 @@ elif menu == "Poisson":
     mu = st.number_input("Rata-rata kejadian (λ)", min_value=0.0, value=3.0)
     x = st.number_input("Jumlah kejadian (x)", min_value=0, value=0)
 
-    if st.button("Hitung"):
+    if st.button("🔢 Hitung"):
         x_vals = np.arange(0, x + 15)
 
         pmf_vals = stats.poisson.pmf(x_vals, mu)
@@ -169,3 +169,4 @@ elif menu == "Poisson":
 # ================== FOOTER ==================
 st.divider()
 st.caption("Dibuat dengan ❤️ menggunakan Streamlit")
+
