@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+from scipy import stats
 
 test = st.sidebar.selectbox("Distribusi Diskrit", ['Home', 'Binomial', 'Hipergeometrik', 'Geometrik', 'Binomial Negatif','Poisson'])
 
@@ -95,3 +96,4 @@ if test == "Poisson":
 
         st.write("Probability Mass Function (PMF):", pmf)
         st.write("Cumulative Distribution Function (CDF):", cdf)
+
