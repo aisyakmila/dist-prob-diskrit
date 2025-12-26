@@ -1,105 +1,161 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
-from scipy.stats import binom
+from scipy import stats
 
-# =========================
-# PAGE CONFIG
-# =========================
+# ================== PAGE CONFIG ==================
 st.set_page_config(
     page_title="Distribusi Probabilitas Diskrit",
     page_icon="📊",
     layout="centered"
 )
 
-# =========================
-# HEADER
-# =========================
-st.title("📊 Distribusi Probabilitas Diskrit")
-st.subheader("Distribusi Binomial")
-st.caption("Menampilkan PMF dan CDF beserta grafiknya")
-
-st.divider()
-
-# =========================
-# SIDEBAR INPUT
-# =========================
-st.sidebar.header("⚙️ Parameter Distribusi")
-
-n = st.sidebar.number_input(
-    "Banyaknya Percobaan (n)",
-    min_value=1,
-    step=1,
-    value=1
+# ================== SIDEBAR ==================
+st.sidebar.title("📊 Distribusi Diskrit")
+menu = st.sidebar.selectbox(
+    "Pilih Distribusi",
+    ["Home", "Binomial", "Hipergeometrik", "Geometrik", "Binomial Negatif", "Poisson"]
 )
 
-p = st.sidebar.slider(
-    "Peluang Kejadian Sukses (p)",
-    min_value=0.0,
-    max_value=1.0,
-    value=0.5
-)
+st.sidebar.markdown("---")
+st.sidebar.caption("PMF & CDF Visualizer")
 
-x = st.sidebar.number_input(
-    "Jumlah Kejadian (x)",
-    min_value=0,
-    max_value=n,
-    step=1,
-    value=0
-)
+# ================== HOME ==================
+if menu == "Home":
+    st.title("📊 Kalkulator Distribusi Probabilitas Diskrit")
+    st.markdown("""
+    Aplikasi ini digunakan untuk menghitung dan memvisualisasikan:
 
-# =========================
-# PERHITUNGAN
-# =========================
-pmf = binom.pmf(x, n, p)
-cdf = binom.cdf(x, n, p)
+    - **Probability Mass Function (PMF)**
+    - **Cumulative Distribution Function (CDF)**
 
-# =========================
-# OUTPUT NILAI
-# =========================
-col1, col2 = st.columns(2)
+    dari beberapa distribusi diskrit berikut:
+    1. Distribusi Binomial  
+    2. Distribusi Hipergeometrik  
+    3. Distribusi Geometrik  
+    4. Distribusi Binomial Negatif  
+    5. Distribusi Poisson  
+    """)
+    st.info("Silakan pilih jenis distribusi pada sidebar.")
 
-with col1:
-    st.metric("📌 PMF", round(pmf, 6))
+# ================== BINOMIAL ==================
+elif menu == "Binomial":
+    st.title("Distribusi Binomial")
 
-with col2:
-    st.metric("📌 CDF", round(cdf, 6))
+    n = st.sidebar.number_input("Jumlah Percobaan (n)", min_value=1, value=5, step=1)
+    p = st.sidebar.slider("Peluang Sukses (p)", 0.0, 1.0, 0.5)
+    x = st.sidebar.number_input("Jumlah Sukses (x)", min_value=0, max_value=n, value=0)
 
-st.info("PMF menunjukkan peluang tepat pada nilai x, sedangkan CDF menunjukkan peluang kumulatif hingga x.")
+    if st.sidebar.button("🔢 Hitung"):
+        x_vals = np.arange(0, n + 1)
+        pmf_vals = stats.binom.pmf(x_vals, n, p)
+        cdf_vals = stats.binom.cdf(x_vals, n, p)
 
-st.divider()
+        col1, col2 = st.columns(2)
+        col1.metric("PMF", round(stats.binom.pmf(x, n, p), 6))
+        col2.metric("CDF", round(stats.binom.cdf(x, n, p), 6))
 
-# =========================
-# DATA UNTUK GRAFIK
-# =========================
-x_values = list(range(0, n + 1))
-pmf_values = binom.pmf(x_values, n, p)
-cdf_values = binom.cdf(x_values, n, p)
+        df = pd.DataFrame({"PMF": pmf_vals, "CDF": cdf_vals}, index=x_vals)
 
-df_pmf = pd.DataFrame({
-    "x": x_values,
-    "PMF": pmf_values
-}).set_index("x")
+        tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+        tab1.bar_chart(df["PMF"])
+        tab2.line_chart(df["CDF"])
 
-df_cdf = pd.DataFrame({
-    "x": x_values,
-    "CDF": cdf_values
-}).set_index("x")
+# ================== HIPERGEOMETRIK ==================
+elif menu == "Hipergeometrik":
+    st.title("Distribusi Hipergeometrik")
 
-# =========================
-# TABS GRAFIK
-# =========================
-tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+    N = st.sidebar.number_input("Ukuran Populasi (N)", min_value=1, value=50)
+    K = st.sidebar.number_input("Jumlah Sukses di Populasi (K)", min_value=1, value=20)
+    n = st.sidebar.number_input("Ukuran Sampel (n)", min_value=1, value=10)
+    x = st.sidebar.number_input("Sukses dalam Sampel (x)", min_value=0, value=0)
 
-with tab1:
-    st.subheader("Grafik Probability Mass Function (PMF)")
-    st.bar_chart(df_pmf)
+    if st.sidebar.button("🔢 Hitung"):
+        max_x = min(n, K)
+        x_vals = np.arange(0, max_x + 1)
 
-with tab2:
-    st.subheader("Grafik Cumulative Distribution Function (CDF)")
-    st.line_chart(df_cdf)
+        pmf_vals = stats.hypergeom.pmf(x_vals, N, K, n)
+        cdf_vals = stats.hypergeom.cdf(x_vals, N, K, n)
 
-# =========================
-# FOOTER
-# =========================
+        col1, col2 = st.columns(2)
+        col1.metric("PMF", round(stats.hypergeom.pmf(x, N, K, n), 6))
+        col2.metric("CDF", round(stats.hypergeom.cdf(x, N, K, n), 6))
+
+        df = pd.DataFrame({"PMF": pmf_vals, "CDF": cdf_vals}, index=x_vals)
+
+        tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+        tab1.bar_chart(df["PMF"])
+        tab2.line_chart(df["CDF"])
+
+# ================== GEOMETRIK ==================
+elif menu == "Geometrik":
+    st.title("Distribusi Geometrik")
+
+    p = st.sidebar.slider("Peluang Sukses (p)", 0.0, 1.0, 0.5)
+    x = st.sidebar.number_input("Percobaan ke-x", min_value=1, value=1)
+
+    if st.sidebar.button("🔢 Hitung"):
+        x_vals = np.arange(1, x + 15)
+
+        pmf_vals = stats.geom.pmf(x_vals, p)
+        cdf_vals = stats.geom.cdf(x_vals, p)
+
+        col1, col2 = st.columns(2)
+        col1.metric("PMF", round(stats.geom.pmf(x, p), 6))
+        col2.metric("CDF", round(stats.geom.cdf(x, p), 6))
+
+        df = pd.DataFrame({"PMF": pmf_vals, "CDF": cdf_vals}, index=x_vals)
+
+        tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+        tab1.bar_chart(df["PMF"])
+        tab2.line_chart(df["CDF"])
+
+# ================== BINOMIAL NEGATIF ==================
+elif menu == "Binomial Negatif":
+    st.title("Distribusi Binomial Negatif")
+
+    r = st.sidebar.number_input("Jumlah Sukses (r)", min_value=1, value=3)
+    p = st.sidebar.slider("Peluang Sukses (p)", 0.0, 1.0, 0.5)
+    x = st.sidebar.number_input("Jumlah Kegagalan", min_value=0, value=0)
+
+    if st.sidebar.button("🔢 Hitung"):
+        x_vals = np.arange(0, x + 15)
+
+        pmf_vals = stats.nbinom.pmf(x_vals, r, p)
+        cdf_vals = stats.nbinom.cdf(x_vals, r, p)
+
+        col1, col2 = st.columns(2)
+        col1.metric("PMF", round(stats.nbinom.pmf(x, r, p), 6))
+        col2.metric("CDF", round(stats.nbinom.cdf(x, r, p), 6))
+
+        df = pd.DataFrame({"PMF": pmf_vals, "CDF": cdf_vals}, index=x_vals)
+
+        tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+        tab1.bar_chart(df["PMF"])
+        tab2.line_chart(df["CDF"])
+
+# ================== POISSON ==================
+elif menu == "Poisson":
+    st.title("Distribusi Poisson")
+
+    mu = st.sidebar.number_input("Rata-rata Kejadian (λ)", min_value=0.0, value=3.0)
+    x = st.sidebar.number_input("Jumlah Kejadian (x)", min_value=0, value=0)
+
+    if st.sidebar.button("🔢 Hitung"):
+        x_vals = np.arange(0, x + 15)
+
+        pmf_vals = stats.poisson.pmf(x_vals, mu)
+        cdf_vals = stats.poisson.cdf(x_vals, mu)
+
+        col1, col2 = st.columns(2)
+        col1.metric("PMF", round(stats.poisson.pmf(x, mu), 6))
+        col2.metric("CDF", round(stats.poisson.cdf(x, mu), 6))
+
+        df = pd.DataFrame({"PMF": pmf_vals, "CDF": cdf_vals}, index=x_vals)
+
+        tab1, tab2 = st.tabs(["📊 Grafik PMF", "📈 Grafik CDF"])
+        tab1.bar_chart(df["PMF"])
+        tab2.line_chart(df["CDF"])
+
 st.divider()
 st.caption("Dibuat dengan ❤️ menggunakan Streamlit")
