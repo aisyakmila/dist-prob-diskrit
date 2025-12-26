@@ -1,118 +1,144 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from scipy import stats
-import matplotlib.pyplot as plt
 
-test = st.sidebar.selectbox("Distribusi Diskrit", ['Home', 'Binomial', 'Hipergeometrik', 'Geometrik', 'Binomial Negatif','Poisson'])
+st.sidebar.title("Distribusi Diskrit")
+test = st.sidebar.selectbox(
+    "Pilih Distribusi",
+    ["Home", "Binomial", "Hipergeometrik", "Geometrik", "Binomial Negatif", "Poisson"]
+)
 
-if (test == "Home"):
-    st.title("Menghitung Probabilitas Distribusi Diskrit")
+# ================= HOME =================
+if test == "Home":
+    st.title("Kalkulator Distribusi Probabilitas Diskrit")
     st.markdown("---")
     st.markdown("""
-        Distribusi probabilitas diskrit adalah suatu daftar atau distribusi di mana variabel 
-        randomnya mengasumsikan masing-masing nilainya dengan probabilitas tertentu. Variabel 
-        diskrit memiliki jumlah nilai kemungkinan yang terbatas atau jumlah yang tak terhingga 
-        dari nilai-nilai yang dapat dihitung
-        
-        Melalui web apps ini anda dapat menghitung probabilitas dari beberapa macam
-        distribusi probabilitas diskrit, yaitu
-        1. Distribusi Binomial
-        2. Hipergeometrik
-        3. Geometrik
-        4. Binomial Negatif
-        5. Poisson
+    Web ini digunakan untuk menghitung **Probability Mass Function (PMF)**
+    dan **Cumulative Distribution Function (CDF)** dari beberapa distribusi diskrit:
 
-        """)
+    1. Binomial  
+    2. Hipergeometrik  
+    3. Geometrik  
+    4. Binomial Negatif  
+    5. Poisson  
+    """)
 
-if test == "Binomial":
+# ================= BINOMIAL =================
+elif test == "Binomial":
     st.title("Distribusi Binomial")
 
-    n = st.number_input("Banyaknya Percobaan (n)", min_value=1, value=1, step=1)
-    p = st.number_input("Peluang Kejadian Sukses (p)", min_value=0.0, max_value=1.0, value=0.5)
-    x = st.number_input("Jumlah Kejadian (x)", min_value=0, max_value=n, value=0, step=1)
+    n = st.number_input("Jumlah percobaan (n)", min_value=1, value=5, step=1)
+    p = st.number_input("Peluang sukses (p)", min_value=0.0, max_value=1.0, value=0.5)
+    x = st.number_input("Jumlah sukses (x)", min_value=0, max_value=n, value=0, step=1)
 
-if st.button("Hitung Probabilitas"):
-    pmf_x = stats.binom.pmf(x, n, p)
-    cdf_x = stats.binom.cdf(x, n, p)
+    if st.button("Hitung"):
+        x_vals = np.arange(0, n + 1)
+        pmf_vals = stats.binom.pmf(x_vals, n, p)
+        cdf_vals = stats.binom.cdf(x_vals, n, p)
 
-    st.success(f"PMF = {pmf_x}")
-    st.info(f"CDF = {cdf_x}")
+        st.success(f"PMF = {stats.binom.pmf(x, n, p)}")
+        st.info(f"CDF = {stats.binom.cdf(x, n, p)}")
 
-    x_vals = np.arange(0, n + 1)
-    pmf_vals = stats.binom.pmf(x_vals, n, p)
-    cdf_vals = stats.binom.cdf(x_vals, n, p)
+        df = pd.DataFrame({"x": x_vals, "PMF": pmf_vals, "CDF": cdf_vals})
 
-    st.subheader("Grafik PMF")
-    st.bar_chart(
-        data=pmf_vals,
-        x=x_vals
-    )
+        st.subheader("Grafik PMF")
+        st.bar_chart(df.set_index("x")["PMF"])
 
-    st.subheader("Grafik CDF")
-    st.line_chart(
-        data=cdf_vals,
-        x=x_vals
-    )
+        st.subheader("Grafik CDF")
+        st.line_chart(df.set_index("x")["CDF"])
 
-
-if (test == "Hipergeometrik"):
+# ================= HIPERGEOMETRIK =================
+elif test == "Hipergeometrik":
     st.title("Distribusi Hipergeometrik")
 
-    N = st.number_input("Jumlah Populasi (N)", value=100, min_value=1, step=1)
-    K = st.number_input("Jumlah Sukses dalam Populasi (K)", value=50, min_value=1, step=1)
-    n = st.number_input("Jumlah Sampel (n)", value=10, min_value=1, step=1)
-    x = st.number_input("Banyaknya Sukses dalam Sampel (x)", value=0, min_value=0, step=1)
-    hitung = st.button ("Hitung Probabilitas")
+    N = st.number_input("Populasi (N)", min_value=1, value=50)
+    K = st.number_input("Jumlah sukses di populasi (K)", min_value=1, value=20)
+    n = st.number_input("Ukuran sampel (n)", min_value=1, value=10)
+    x = st.number_input("Sukses dalam sampel (x)", min_value=0, value=0)
 
-    if hitung :
-        pmf = stats.hypergeom.pmf(x, N, K, n)
-        cdf = stats.hypergeom.cdf(x, N, K, n)
+    if st.button("Hitung"):
+        x_vals = np.arange(0, min(n, K) + 1)
+        pmf_vals = stats.hypergeom.pmf(x_vals, N, K, n)
+        cdf_vals = stats.hypergeom.cdf(x_vals, N, K, n)
 
-        st.write("Probability Mass Function (PMF):", pmf)
-        st.write("Cumulative Distribution Function (CDF):", cdf)
+        st.success(f"PMF = {stats.hypergeom.pmf(x, N, K, n)}")
+        st.info(f"CDF = {stats.hypergeom.cdf(x, N, K, n)}")
 
-if (test == "Geometrik"):
+        df = pd.DataFrame({"x": x_vals, "PMF": pmf_vals, "CDF": cdf_vals})
+
+        st.subheader("Grafik PMF")
+        st.bar_chart(df.set_index("x")["PMF"])
+
+        st.subheader("Grafik CDF")
+        st.line_chart(df.set_index("x")["CDF"])
+
+# ================= GEOMETRIK =================
+elif test == "Geometrik":
     st.title("Distribusi Geometrik")
 
-    p = st.number_input("Probabilitas Sukses (p)", value=0.5, min_value=0.0, max_value=1.0, step=0.01)
-    x = st.number_input("Banyaknya Percobaan sampai Sukses Pertama (x)", value=1, min_value=1, step=1)
-    hitung = st.button ("Hitung Probabilitas")
+    p = st.number_input("Peluang sukses (p)", min_value=0.0, max_value=1.0, value=0.5)
+    x = st.number_input("Percobaan ke-x", min_value=1, value=1)
 
-    if hitung :
-        pmf = stats.geom.pmf(x, p)
-        cdf = stats.geom.cdf(x, p)
+    if st.button("Hitung"):
+        x_vals = np.arange(1, x + 10)
+        pmf_vals = stats.geom.pmf(x_vals, p)
+        cdf_vals = stats.geom.cdf(x_vals, p)
 
-        st.write("Probability Mass Function (PMF):", pmf)
-        st.write("Cumulative Distribution Function (CDF):", cdf)
+        st.success(f"PMF = {stats.geom.pmf(x, p)}")
+        st.info(f"CDF = {stats.geom.cdf(x, p)}")
 
-if (test == "Binomial Negatif"):
+        df = pd.DataFrame({"x": x_vals, "PMF": pmf_vals, "CDF": cdf_vals})
+
+        st.subheader("Grafik PMF")
+        st.bar_chart(df.set_index("x")["PMF"])
+
+        st.subheader("Grafik CDF")
+        st.line_chart(df.set_index("x")["CDF"])
+
+# ================= BINOMIAL NEGATIF =================
+elif test == "Binomial Negatif":
     st.title("Distribusi Binomial Negatif")
 
-    n = st.number_input("Jumlah Sukses yang Muncul (k)", value=1, min_value=1, step=1)
-    p = st.number_input("Peluang Sukses (p)", value=0.5, min_value=0.0, max_value=1.0, step=0.01)
-    x = st.number_input("Jumla Percobaan Sampai Mendapatkan Sukses ke-k (x)", value=0, min_value=0, step=1)
-    hitung = st.button ("Hitung Probabilitas")
+    r = st.number_input("Jumlah sukses (r)", min_value=1, value=3)
+    p = st.number_input("Peluang sukses (p)", min_value=0.0, max_value=1.0, value=0.5)
+    x = st.number_input("Jumlah kegagalan", min_value=0, value=0)
 
-    if hitung :
-        pmf = stats.nbinom.pmf(x, n, p)
-        cdf = stats.nbinom.cdf(x, n, p)
+    if st.button("Hitung"):
+        x_vals = np.arange(0, x + 15)
+        pmf_vals = stats.nbinom.pmf(x_vals, r, p)
+        cdf_vals = stats.nbinom.cdf(x_vals, r, p)
 
-        st.write("Probability Mass Function (PMF):", pmf)
-        st.write("Cumulative Distribution Function (CDF):", cdf)
+        st.success(f"PMF = {stats.nbinom.pmf(x, r, p)}")
+        st.info(f"CDF = {stats.nbinom.cdf(x, r, p)}")
 
-if test == "Poisson":
+        df = pd.DataFrame({"x": x_vals, "PMF": pmf_vals, "CDF": cdf_vals})
+
+        st.subheader("Grafik PMF")
+        st.bar_chart(df.set_index("x")["PMF"])
+
+        st.subheader("Grafik CDF")
+        st.line_chart(df.set_index("x")["CDF"])
+
+# ================= POISSON =================
+elif test == "Poisson":
     st.title("Distribusi Poisson")
 
-    mu = st.number_input("Rata-rata kejadian sukses (lambda)", value=1.0, min_value=0.0, step=0.01)
-    x = st.number_input("Banyaknya Sukses yang terjadi dalam suatu selan waktu (x)", value=0, min_value=0, step=1)
-    hitung = st.button ("Hitung Probabilitas")
+    mu = st.number_input("Rata-rata kejadian (λ)", min_value=0.0, value=3.0)
+    x = st.number_input("Jumlah kejadian (x)", min_value=0, value=0)
 
-    if hitung :
-        pmf = stats.poisson.pmf(x, mu)
-        cdf = stats.poisson.cdf(x, mu)
+    if st.button("Hitung"):
+        x_vals = np.arange(0, x + 15)
+        pmf_vals = stats.poisson.pmf(x_vals, mu)
+        cdf_vals = stats.poisson.cdf(x_vals, mu)
 
-        st.write("Probability Mass Function (PMF):", pmf)
-        st.write("Cumulative Distribution Function (CDF):", cdf)
+        st.success(f"PMF = {stats.poisson.pmf(x, mu)}")
+        st.info(f"CDF = {stats.poisson.cdf(x, mu)}")
 
+        df = pd.DataFrame({"x": x_vals, "PMF": pmf_vals, "CDF": cdf_vals})
 
+        st.subheader("Grafik PMF")
+        st.bar_chart(df.set_index("x")["PMF"])
 
+        st.subheader("Grafik CDF")
+        st.line_chart(df.set_index("x")["CDF"])
