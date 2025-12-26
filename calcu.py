@@ -31,35 +31,28 @@ if test == "Binomial":
     p = st.number_input("Peluang Kejadian Sukses (p)", min_value=0.0, max_value=1.0, value=0.5)
     x = st.number_input("Jumlah Kejadian (x)", min_value=0, max_value=n, value=0, step=1)
 
-    if st.button("Hitung Probabilitas"):
-        # hitung nilai
-        pmf_x = stats.binom.pmf(x, n, p)
-        cdf_x = stats.binom.cdf(x, n, p)
+if st.button("Hitung Probabilitas"):
+    pmf_x = stats.binom.pmf(x, n, p)
+    cdf_x = stats.binom.cdf(x, n, p)
 
-        st.success(f"PMF = {pmf_x}")
-        st.info(f"CDF = {cdf_x}")
+    st.success(f"PMF = {pmf_x}")
+    st.info(f"CDF = {cdf_x}")
 
-        # data untuk grafik
-        x_vals = np.arange(0, n + 1)
-        pmf_vals = stats.binom.pmf(x_vals, n, p)
-        cdf_vals = stats.binom.cdf(x_vals, n, p)
+    x_vals = np.arange(0, n + 1)
+    pmf_vals = stats.binom.pmf(x_vals, n, p)
+    cdf_vals = stats.binom.cdf(x_vals, n, p)
 
-        # ===== GRAFIK PMF =====
-        fig1, ax1 = plt.subplots()
-        ax1.bar(x_vals, pmf_vals)
-        ax1.set_title("Grafik Probability Mass Function (PMF)")
-        ax1.set_xlabel("x")
-        ax1.set_ylabel("P(X = x)")
-        st.pyplot(fig1)
+    st.subheader("Grafik PMF")
+    st.bar_chart(
+        data=pmf_vals,
+        x=x_vals
+    )
 
-        # ===== GRAFIK CDF =====
-        fig2, ax2 = plt.subplots()
-        ax2.plot(x_vals, cdf_vals, marker='o')
-        ax2.set_title("Grafik Cumulative Distribution Function (CDF)")
-        ax2.set_xlabel("x")
-        ax2.set_ylabel("P(X ≤ x)")
-        ax2.set_ylim(0, 1)
-        st.pyplot(fig2)
+    st.subheader("Grafik CDF")
+    st.line_chart(
+        data=cdf_vals,
+        x=x_vals
+    )
 
 
 if (test == "Hipergeometrik"):
@@ -120,5 +113,6 @@ if test == "Poisson":
 
         st.write("Probability Mass Function (PMF):", pmf)
         st.write("Cumulative Distribution Function (CDF):", cdf)
+
 
 
